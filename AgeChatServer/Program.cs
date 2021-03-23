@@ -10,6 +10,7 @@ namespace AgeChatServer
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("hello");
         }
     }
 }
