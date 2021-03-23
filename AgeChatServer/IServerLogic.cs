@@ -9,5 +9,6 @@ namespace AgeChatServer
     interface IServerLogic
     {
         void run();
+
     }
 }
