@@ -8,11 +8,11 @@ namespace AgeChatServer
 {
     static class Opcode
     {
-        static int Fragment = 0;
-        static int Text = 1;
-        static int Binary = 2;
-        static int CloseConnection = 8;
-        static int Ping = 9;
-        static int Pong = 10;
+        public static int Fragment = 0;
+        public static int Text = 1;
+        public static int Binary = 2;
+        public static int CloseConnection = 8;
+        public static int Ping = 9;
+        public static int Pong = 10;
     }
 }

@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AgeChatServer
@@ -12,26 +15,29 @@ namespace AgeChatServer
     {
         static void Main(string[] args)
         {
-            DataBase db = new DataBase();
-            MySqlCommand command = new MySqlCommand("SELECT username FROM `users` WHERE `passwordHash` = SHA1('123')", db.getConnection());
-            db.openConnection();
-            MySqlDataReader reader;
-            reader = command.ExecuteReader();
-            string user = "";
-            while (reader.Read())
+            /*var server = new Server();
+
+            var listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            listeningSocket.Bind(new IPEndPoint(IPAddress.Any, port: 8080));
+            listeningSocket.Listen(0);
+            var connectedClients = new List<Client>();
+
+            while (true)
             {
-                user = reader.GetString(0);
-            }
-            if(user != "")
-            {
-                Console.WriteLine(user);
-            }
-            else
-            {
-                Console.WriteLine("User not found!");
-            }
-            db.closeConnection();
-            Console.ReadKey();
+                var clientSocket = listeningSocket.Accept();
+                connectedClients.Add(new Client(clientSocket));
+                Console.WriteLine("A client connected.");
+                Console.WriteLine("Client's IpAddress is :" + IPAddress.Parse(((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString()) + ", connected on port number " + ((IPEndPoint)clientSocket.LocalEndPoint).Port.ToString());
+                Console.WriteLine("not started yet");
+                var nextThread = new Thread(new ThreadStart(() =>
+                {
+                    Console.WriteLine("started");
+                    server.run(connectedClients);
+                }));
+                nextThread.Start();
+            }*/
+            var server = new Server();
+            server.run();
         }
     }
 }
