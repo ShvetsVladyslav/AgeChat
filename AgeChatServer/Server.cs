@@ -8,5 +8,9 @@ namespace AgeChatServer
 {
     class Server : IServerLogic
     {
+        public void run()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
