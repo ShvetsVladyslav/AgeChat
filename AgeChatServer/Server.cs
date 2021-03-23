@@ -35,8 +35,12 @@ namespace AgeChatServer
                     handShake(connectedClients[connectedClients.Count - 1].clientSocket);
                     while (true)
                     {
-                        Console.WriteLine("started");
-                        request(connectedClients[connectedClients.Count - 1], connectedClients);
+                        try
+                        {
+                            request(connectedClients[connectedClients.Count - 1], connectedClients);
+                        }
+                        catch (Exception e) { break; }
+                        
                     }
                 }));
                 nextThread.Start();
