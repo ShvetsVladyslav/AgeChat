@@ -11,19 +11,19 @@ namespace AgeChatServer
     {
         MySqlConnection con = new MySqlConnection("server=localhost;port=3306;username=root;database=agechat");
 
-        public void openConnection()
+        public void OpenConnection()
         {
             if (con.State == System.Data.ConnectionState.Closed)
                 con.Open();
         }
 
-        public void closeConnection()
+        public void CloseConnection()
         {
             if (con.State == System.Data.ConnectionState.Open)
                 con.Close();
         }
 
-        public MySqlConnection getConnection()
+        public MySqlConnection GetConnection()
         {
             return con;
         }

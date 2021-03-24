@@ -9,14 +9,14 @@ namespace AgeChatServer
 {
     interface IServerLogic
     {
-        void run();
-        void handShake(Socket clientSocket);
-        void request(Client client, List<Client> connectedClients);
-        void login(Client client, List<Client> connectedClients);
-        void registration(string log, string pass, string username, List<Client> connectedClients);
-        void messageToGlobalChat(string msg, Client sender, List<Client> connectedClients);
-        void personalMessage(string msg, Client sender, Client receiver, List<Client> connectedClients);
-        void sendGlobalMessageList(Client client, List<Client> connectedClients);
-        void sendMessageList(Client receiver, Client sender, List<Client> connectedClients);
+        void Run();
+        void HandShake(Socket clientSocket);
+        void Request(Client client);
+        void Login(Client client);
+        void Registration(string log, string pass, string username);
+        void MessageToGlobalChat(string msg, Client sender);
+        void PersonalMessage(string msg, Client sender, Client receiver);
+        void SendGlobalMessageList(Client client);
+        void SendMessageList(Client receiver, Client sender);
     }
 }

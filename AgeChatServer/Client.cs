@@ -9,29 +9,37 @@ namespace AgeChatServer
 {
     class Client
     {
-        public Socket clientSocket;
+        private Socket clientSocket;
         private User logginedUser;
         public Client(Socket sok) 
         {
             this.clientSocket = sok;
         }
-        public void connectUser(User user)
+        public Socket GetClientSocket()
+        {
+            return clientSocket;
+        }
+        public void ConnectUser(User user)
         {
             this.logginedUser = user;
         }
-        public int getID()
+        public User GetUser()
         {
-            return this.logginedUser.clientID;
+            return logginedUser;
         }
-        public string getUsername()
+        public int GetID()
+        {
+            return this.logginedUser.id;
+        }
+        public string GetUsername()
         {
             return this.logginedUser.username;
         }
-        public void setClientID(int id)
+        public void SetClientID(int id)
         {
-            this.logginedUser.clientID = id;
+            this.logginedUser.id = id;
         }
-        public void setUsername(string Username)
+        public void SetUsername(string Username)
         {
             this.logginedUser.username = Username;
         }

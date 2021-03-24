@@ -16,7 +16,7 @@ namespace AgeChatServer
         static void Main(string[] args)
         {
             var server = new Server();
-            server.run();
+            server.Run();
         }
     }
 }

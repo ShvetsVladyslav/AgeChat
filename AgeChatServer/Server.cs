@@ -14,87 +14,87 @@ namespace AgeChatServer
 {
     class Server : IServerLogic
     {
-        public void run()
+        List<User> users;
+        List<Client> connectedClients;
+        public void Run()
         {
             var server = new Server();
 
             var listeningSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             listeningSocket.Bind(new IPEndPoint(IPAddress.Any, port: 8080));
             listeningSocket.Listen(0);
-            var connectedClients = new List<Client>();
+            connectedClients = new List<Client>();
+
+            //Getting list of all existed users
+            FillUserList();
+            //
 
             while (true)
             {
                 var clientSocket = listeningSocket.Accept();
-                connectedClients.Add(new Client(clientSocket));
-                Console.WriteLine("A client connected.");
-                Console.WriteLine("Client's IpAddress is :" + IPAddress.Parse(((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString()) + ", connected on port number " + ((IPEndPoint)clientSocket.LocalEndPoint).Port.ToString());
                 Console.WriteLine("not started yet");
                 var nextThread = new Thread(new ThreadStart(() =>
                 {
-                    handShake(connectedClients[connectedClients.Count - 1].clientSocket);
+                    connectedClients.Add(new Client(clientSocket));
+                    Console.WriteLine("A client connected.");
+                    Console.WriteLine("Client's IpAddress is :" + IPAddress.Parse(((IPEndPoint)clientSocket.RemoteEndPoint).Address.ToString()) + ", connected on port number " + ((IPEndPoint)clientSocket.LocalEndPoint).Port.ToString());
+
+                    HandShake(connectedClients[connectedClients.Count - 1].GetClientSocket());
+
                     while (true)
                     {
                         try
                         {
-                            request(connectedClients[connectedClients.Count - 1], connectedClients);
+                            Request(connectedClients[connectedClients.Count - 1]);
                         }
                         catch (Exception e) { break; }
-                        
                     }
                 }));
                 nextThread.Start();
             }
         }
-        public void login(Client client, List<Client> connectedClients)
+        public void Login(Client client)
         {
             Console.WriteLine("login started");
-            string login = receiveMessage(client, connectedClients);
-            string pass = receiveMessage(client, connectedClients);
+            string login = ReceiveMessage(client);
+            string pass = ReceiveMessage(client);
 
             Console.WriteLine(login + " " + pass);
 
-            client.connectUser(new User());
             DataBase db = new DataBase();
-            MySqlCommand command = new MySqlCommand("SELECT * FROM `users` WHERE login = '" + login + "' AND passwordHash = SHA1('" + pass + "')", db.getConnection());
-            db.openConnection();
+            MySqlCommand command = new MySqlCommand("SELECT * FROM `users` WHERE login = '" + login + "' AND passwordHash = SHA1('" + pass + "')", db.GetConnection());
+            db.OpenConnection();
             MySqlDataReader reader;
             reader = command.ExecuteReader();
             reader.Read();
-            /*while (reader.Read())
-            {
-                if (login == (reader["login"].ToString()) && SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(pass)) == Encoding.UTF8.GetBytes(reader["passwordHash"].ToString()))
-                {
-                    client.setClientID(Int32.Parse(reader["ClientID"].ToString()));
-                    client.setUsername(reader["UserName"].ToString());
-                    Console.WriteLine("client logged in");
-                    break;
-                }
-            }*/
             if (reader.HasRows)
             {
-                client.setClientID(Int32.Parse(reader[0].ToString()));
-                client.setUsername(reader[3].ToString());
+                client.ConnectUser(new User());
+                client.SetClientID(Int32.Parse(reader[0].ToString()));
+                client.SetUsername(reader[3].ToString());
+                //setting online status to user
+                GoOnline(client);
+                //
                 Console.WriteLine("client logged in");
             }
             else
             {
                 Console.WriteLine("no client found!");
             }
-            db.closeConnection();
+            db.CloseConnection();
         }
 
-        public void messageToGlobalChat(string msg, Client sender, List<Client> connectedClients)
+        public void MessageToGlobalChat(string msg, Client sender)
         {
             throw new NotImplementedException();
         }
 
-        public void personalMessage(string msg, Client sender, Client receiver, List<Client> connectedClients)
+        public void PersonalMessage(string msg, Client sender, Client receiver)
         {
             throw new NotImplementedException();
         }
 
-        public void registration(string log, string pass, string username, List<Client> connectedClients)
+        public void Registration(string log, string pass, string username)
         {
             /*DataBase db = new DataBase();
             MySqlCommand command = new MySqlCommand(db.getConnection());
@@ -138,13 +138,19 @@ namespace AgeChatServer
 
         }
 
-        public void request(Client client, List<Client> connectedClients)
+        public void Request(Client client)
         {
-            var receivedString = receiveMessage(client, connectedClients);
-            Console.WriteLine($"Client: {receivedString}");
+            var receivedString = ReceiveMessage(client);
+            IPAddress ip = IPAddress.Parse(((IPEndPoint)client.GetClientSocket().RemoteEndPoint).Address.ToString());
+
+            if (connectedClients.Contains(client))
+            {
+                Console.WriteLine($"Client {ip}: {receivedString}");
+            }
+            
             if(receivedString == "login")
             {
-                login(client, connectedClients);
+                Login(client);
             }
             else
             {
@@ -152,17 +158,17 @@ namespace AgeChatServer
             }
         }
 
-        public void sendGlobalMessageList(Client client, List<Client> connectedClients)
+        public void SendGlobalMessageList(Client client)
         {
             throw new NotImplementedException();
         }
 
-        public void sendMessageList(Client receiver, Client sender, List<Client> connectedClients)
+        public void SendMessageList(Client receiver, Client sender)
         {
             throw new NotImplementedException();
         }
 
-        public void handShake(Socket clientSocket)
+        public void HandShake(Socket clientSocket)
         {
             var receivedData = new byte[1000000];
             var receivedDataLength = clientSocket.Receive(receivedData);
@@ -185,19 +191,23 @@ namespace AgeChatServer
                 clientSocket.Send(Encoding.UTF8.GetBytes(response));
             }
         }
-        private string receiveMessage(Client client, List<Client> connectedClients)
+        private string ReceiveMessage(Client client)
         {
+            IPAddress ip = IPAddress.Parse(((IPEndPoint)client.GetClientSocket().RemoteEndPoint).Address.ToString());
             var frameParser = new FrameParser();
             while (true)
             {
                 var receivedData = new byte[1000000];
                 string receivedString;
-                client.clientSocket.Receive(receivedData);
+                client.GetClientSocket().Receive(receivedData);
                 if ((receivedData[0] & (byte)Opcode.CloseConnection) == (byte)Opcode.CloseConnection)
                 {
                     // Close connection request.
-                    Console.WriteLine("Client disconnected.");
-                    client.clientSocket.Close();
+                    Console.WriteLine("Client with ip: " + ip + " disconnected!");
+                    client.GetClientSocket().Close();
+                    //setting offline status to user
+                    GoOffline(client);
+                    //
                     connectedClients.Remove(client);
                     return "";
                 }
@@ -205,6 +215,56 @@ namespace AgeChatServer
                 {
                     receivedString = frameParser.ParsePayloadFromFrame(receivedData);
                     return receivedString;
+                }
+            }
+        }
+        private void FillUserList()
+        {
+            users = new List<User>();
+            DataBase db = new DataBase();
+            MySqlCommand command = new MySqlCommand("SELECT * FROM `users`", db.GetConnection());
+            MySqlDataReader MyDataReader;
+            db.OpenConnection();
+
+            MyDataReader = command.ExecuteReader();
+            while (MyDataReader.Read())
+            {
+                users.Add(new User());
+                users[users.Count - 1].id = MyDataReader.GetInt32(0);
+                users[users.Count - 1].username = MyDataReader.GetString(3);
+            }
+
+            db.CloseConnection();
+            Console.WriteLine($"UserList initialized, there are {users.Count} registered users");
+        }
+        private void GoOnline(Client client)
+        {
+            for (int i = 0; i < users.Count; i++)
+            {
+                if (client.GetID() == users[i].id && client.GetUsername() == users[i].username)
+                {
+                    if (!users[i].IsOnline())
+                    {
+                        users[i].Online();
+                        Console.WriteLine($"User {users[i].username} is online");
+                    }
+                }
+            }
+        }
+        private void GoOffline(Client client)
+        {
+            if (client.GetUser() != null)
+            {
+                for (int i = 0; i < users.Count; i++)
+                {
+                    if (client.GetID() == users[i].id && client.GetUsername() == users[i].username)
+                    {
+                        if (users[i].IsOnline())
+                        {
+                            users[i].Offline();
+                            Console.WriteLine($"User {users[i].username} is offline");
+                        }
+                    }
                 }
             }
         }

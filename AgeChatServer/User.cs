@@ -8,7 +8,22 @@ namespace AgeChatServer
 {
     class User
     {
-        public int clientID { get; set; }
+        public int id { get; set; }
         public string username { get; set; }
+
+        private bool isOnline = false;
+
+        public void Online()
+        {
+            isOnline = true;
+        }
+        public void Offline()
+        {
+            isOnline = false;
+        }
+        public bool IsOnline()
+        {
+            return isOnline;
+        }
     }
 }
