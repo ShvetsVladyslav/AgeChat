@@ -59,8 +59,6 @@ namespace AgeChatServer
             string login = ReceiveMessage(client);
             string pass = ReceiveMessage(client);
 
-            Console.WriteLine(login + " " + pass);
-
             DataBase db = new DataBase();
             MySqlCommand command = new MySqlCommand("SELECT * FROM `users` WHERE login = '" + login + "' AND passwordHash = SHA1('" + pass + "')", db.GetConnection());
             db.OpenConnection();
@@ -76,10 +74,12 @@ namespace AgeChatServer
                 GoOnline(client);
                 //
                 Console.WriteLine("client logged in");
+                SendMessage("user logged in", client.GetClientSocket());
             }
             else
             {
                 Console.WriteLine("no client found!");
+                SendMessage("user not found", client.GetClientSocket());
             }
             db.CloseConnection();
         }
@@ -94,48 +94,37 @@ namespace AgeChatServer
             throw new NotImplementedException();
         }
 
-        public void Registration(string log, string pass, string username)
+        public void Registration(Client client)
         {
-            /*DataBase db = new DataBase();
-            MySqlCommand command = new MySqlCommand(db.getConnection());
-            db.openConnection();
+            Console.WriteLine("registration started");
+            string login = ReceiveMessage(client);
+            string pass = ReceiveMessage(client);
+            string username = ReceiveMessage(client);
+
+            pass = string.Concat(SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(pass)).Select(b => b.ToString("x2")));
+
+            DataBase db = new DataBase();
+            db.OpenConnection();
             try
             {
-                // Команда Insert.
-                string sql = "Insert into User (Login, Password, Username) "
-                                                 + " values (@Login, @Password, @Username) ";
+                string sql = "INSERT INTO `users` (login, passwordHash, username) values (@Login, @Password, @Username) ";
+                MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
 
-                SqlCommand cmd = command.CreateCommand();
-                cmd.CommandText = sql;
+                command.Parameters.Add("@Login", MySqlDbType.VarChar).Value = login;
+                command.Parameters.Add("@Password", MySqlDbType.String).Value = pass;
+                command.Parameters.Add("@Username", MySqlDbType.VarChar).Value = username;
+                int rowCount = command.ExecuteNonQuery();
 
-                // Создать объект Parameter.
-                cmd.Parameters.Add("@Login", SqlDbType.string).Value = log
-
-                // Добавить параметр @highSalary (Написать короче).
-                cmd.Parameters.Add("@Password", SqlDbType.string).Value = pass;
-
-                // Добавить параметр @lowSalary (Написать короче).
-                cmd.Parameters.Add("@Username", SqlDbType.string).Value = username;
-
-                // Выполнить Command (Используется для delete, insert, update).
-                int rowCount = cmd.ExecuteNonQuery();
-
-                Console.WriteLine("Row Count affected = " + rowCount);
+                Console.WriteLine($"User {username} registered!\nRows affected = " + rowCount);
+                SendMessage($"User {username} registered!", client.GetClientSocket());
+                FillUserList();
             }
             catch (Exception e)
             {
                 Console.WriteLine("Error: " + e);
-                Console.WriteLine(e.StackTrace);
+                SendMessage($"Error: registration failed!", client.GetClientSocket());
             }
-            finally
-            {
-                connection.Close();
-                connection.Dispose();
-                connection = null;
-            }
-
-            Console.Read();*/
-
+            db.CloseConnection();
         }
 
         public void Request(Client client)
@@ -152,9 +141,14 @@ namespace AgeChatServer
             {
                 Login(client);
             }
+            else if (receivedString == "registration")
+            {
+                Registration(client);
+            }
             else
             {
                 Console.WriteLine("Unknown command!");
+                SendMessage("Unknown command!", client.GetClientSocket());
             }
         }
 
@@ -217,6 +211,12 @@ namespace AgeChatServer
                     return receivedString;
                 }
             }
+        }
+        private void SendMessage(string message, Socket receiver)
+        {
+            FrameParser frameParser = new FrameParser();
+            var dataToSend = frameParser.CreateFrameFromString(message);
+            receiver.Send(dataToSend);
         }
         private void FillUserList()
         {
