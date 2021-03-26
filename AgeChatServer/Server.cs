@@ -56,32 +56,48 @@ namespace AgeChatServer
         public void Login(Client client)
         {
             Console.WriteLine("login started");
-            string login = ReceiveMessage(client);
-            string pass = ReceiveMessage(client);
-
-            DataBase db = new DataBase();
-            MySqlCommand command = new MySqlCommand("SELECT * FROM `users` WHERE login = '" + login + "' AND passwordHash = SHA1('" + pass + "')", db.GetConnection());
-            db.OpenConnection();
-            MySqlDataReader reader;
-            reader = command.ExecuteReader();
-            reader.Read();
-            if (reader.HasRows)
+            if (client.GetUser() == null)
             {
-                client.ConnectUser(new User());
-                client.SetClientID(Int32.Parse(reader[0].ToString()));
-                client.SetUsername(reader[3].ToString());
-                //setting online status to user
-                GoOnline(client);
-                //
-                Console.WriteLine("client logged in");
-                SendMessage("user logged in", client.GetClientSocket());
+                string login = ReceiveMessage(client);
+                string pass = ReceiveMessage(client);
+
+                DataBase db = new DataBase();
+                MySqlCommand command = new MySqlCommand("SELECT * FROM `users` WHERE login = '" + login + "' AND passwordHash = SHA1('" + pass + "')", db.GetConnection());
+                db.OpenConnection();
+                MySqlDataReader reader;
+                reader = command.ExecuteReader();
+                reader.Read();
+                if (reader.HasRows)
+                {
+                    client.ConnectUser(new User());
+                    client.SetClientID(Int32.Parse(reader[0].ToString()));
+                    client.SetUsername(reader[3].ToString());
+                    //setting online status to user
+                    GoOnline(client);
+                    //
+                    Console.WriteLine("client logged in");
+                    SendMessage("user logged in", client.GetClientSocket());
+                }
+                else
+                {
+                    Console.WriteLine("no client found!");
+                    SendMessage("user not found", client.GetClientSocket());
+                }
+                db.CloseConnection();
             }
             else
             {
-                Console.WriteLine("no client found!");
-                SendMessage("user not found", client.GetClientSocket());
+                Console.WriteLine("user already logged in");
+                SendMessage("You're already logged in!", client.GetClientSocket());
             }
-            db.CloseConnection();
+        }
+        public void Logout(Client client)
+        {
+            if (client.GetUser() != null)
+            {
+                GoOffline(client);
+                client.DisconnectUser();
+            }
         }
 
         public void MessageToGlobalChat(string msg, Client sender)
@@ -97,34 +113,42 @@ namespace AgeChatServer
         public void Registration(Client client)
         {
             Console.WriteLine("registration started");
-            string login = ReceiveMessage(client);
-            string pass = ReceiveMessage(client);
-            string username = ReceiveMessage(client);
-
-            pass = string.Concat(SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(pass)).Select(b => b.ToString("x2")));
-
-            DataBase db = new DataBase();
-            db.OpenConnection();
-            try
+            if (client.GetUser() == null)
             {
-                string sql = "INSERT INTO `users` (login, passwordHash, username) values (@Login, @Password, @Username) ";
-                MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
+                string login = ReceiveMessage(client);
+                string pass = ReceiveMessage(client);
+                string username = ReceiveMessage(client);
 
-                command.Parameters.Add("@Login", MySqlDbType.VarChar).Value = login;
-                command.Parameters.Add("@Password", MySqlDbType.String).Value = pass;
-                command.Parameters.Add("@Username", MySqlDbType.VarChar).Value = username;
-                int rowCount = command.ExecuteNonQuery();
+                pass = string.Concat(SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(pass)).Select(b => b.ToString("x2")));
 
-                Console.WriteLine($"User {username} registered!\nRows affected = " + rowCount);
-                SendMessage($"User {username} registered!", client.GetClientSocket());
-                FillUserList();
+                DataBase db = new DataBase();
+                db.OpenConnection();
+                try
+                {
+                    string sql = "INSERT INTO `users` (login, passwordHash, username) VALUES (@Login, @Password, @Username) ";
+                    MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
+
+                    command.Parameters.Add("@Login", MySqlDbType.VarChar).Value = login;
+                    command.Parameters.Add("@Password", MySqlDbType.String).Value = pass;
+                    command.Parameters.Add("@Username", MySqlDbType.VarChar).Value = username;
+                    int rowCount = command.ExecuteNonQuery();
+
+                    Console.WriteLine($"User {username} registered!\nRows affected = " + rowCount);
+                    SendMessage($"User {username} registered!", client.GetClientSocket());
+                    FillUserList();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: " + e);
+                    SendMessage($"Error: registration failed!", client.GetClientSocket());
+                }
+                db.CloseConnection();
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine("Error: " + e);
-                SendMessage($"Error: registration failed!", client.GetClientSocket());
+                Console.WriteLine("user already logged in");
+                SendMessage("You already have account!", client.GetClientSocket());
             }
-            db.CloseConnection();
         }
 
         public void Request(Client client)
@@ -144,6 +168,10 @@ namespace AgeChatServer
             else if (receivedString == "registration")
             {
                 Registration(client);
+            }
+            else if (receivedString == "logout")
+            {
+                Logout(client);
             }
             else
             {

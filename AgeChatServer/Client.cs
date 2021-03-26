@@ -23,6 +23,10 @@ namespace AgeChatServer
         {
             this.logginedUser = user;
         }
+        public void DisconnectUser()
+        {
+            this.logginedUser = null;
+        }
         public User GetUser()
         {
             return logginedUser;

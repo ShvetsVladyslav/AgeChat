@@ -13,6 +13,7 @@ namespace AgeChatServer
         void HandShake(Socket clientSocket);
         void Request(Client client);
         void Login(Client client);
+        void Logout(Client client);
         void Registration(Client client);
         void MessageToGlobalChat(string msg, Client sender);
         void PersonalMessage(string msg, Client sender, Client receiver);
