@@ -101,37 +101,50 @@ namespace AgeChatServer
             }
         }
 
-        public void MessageToGlobalChat(string msg, Client sender)
+        public void MessageToGlobalChat(Client sender)
         {
-            //ReceiveMessage(sender);
-            //DataBase db = new DataBase();
-            //db.OpenConnection();
-            //try
-            //{
-            //    DateTime sendTime = new DateTime();
-            //    sendTime = DateTime.Now;
-            //    string sql = "INSERT INTO `MessageHistory` (message, sender, receiver, datetime) values (@msg, @sender, @receiver, @datetime) ";
-            //    MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
+            Console.WriteLine("Global chat message");
+            if (sender.GetUser() != null)
+            {
+                string msg = ReceiveMessage(sender);
+                DataBase db = new DataBase();
+                db.OpenConnection();
+                try
+                {
+                    DateTime sendTime = new DateTime();
+                    sendTime = DateTime.Now;
+                    string sql = "INSERT INTO `globalmessages` (senderId, messageText, datetime) values (@sender, @msg, @datetime)";
+                    MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
 
-            //    command.Parameters.Add("@msg", MySqlDbType.VarChar).Value = msg;
-            //    command.Parameters.Add("@sender", MySqlDbType.String).Value = sender;
-            //    command.Parameters.Add("@receiver", MySqlDbType.VarChar).Value = receiver;
-            //    command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
-            //    int rowCount = command.ExecuteNonQuery();
-            //    Console.WriteLine($"Message saved !\nRows affected = " + rowCount);
-            //    FillUserList();
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("Error: " + e);
-            //}
-            //db.CloseConnection();
-            //SendMessage(msg, receiver.GetClientSocket());
+                    command.Parameters.Add("@msg", MySqlDbType.VarChar).Value = msg;
+                    command.Parameters.Add("@sender", MySqlDbType.String).Value = sender.GetID();
+                    command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
+                    int rowCount = command.ExecuteNonQuery();
+                    Console.WriteLine($"Message saved!\nRows affected = " + rowCount);
+
+                    for (int i = 0; i < connectedClients.Count; i++)
+                    {
+                        if (connectedClients[i].GetClientSocket() != sender.GetClientSocket())
+                        {
+                            SendMessage(msg, connectedClients[i].GetClientSocket());
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: " + e);
+                }
+                db.CloseConnection();
+            }
+            else
+            {
+                SendMessage("You have to log in first!", sender.GetClientSocket());
+            }
         }
 
         public void PersonalMessage(string msg, Client sender)
         {
-            ReceiveMessage(sender);
+            /*ReceiveMessage(sender);
             DataBase db = new DataBase();
             db.OpenConnection();
             try
@@ -154,7 +167,7 @@ namespace AgeChatServer
                 Console.WriteLine("Error: " + e);
             }
             db.CloseConnection();
-            SendMessage(msg, receiver.GetClientSocket());
+            SendMessage(msg, receiver.GetClientSocket());*/
         }
 
         public void Registration(Client client)
@@ -219,6 +232,10 @@ namespace AgeChatServer
             else if (receivedString == "logout")
             {
                 Logout(client);
+            }
+            else if (receivedString == "gm")
+            {
+                MessageToGlobalChat(client);
             }
             else
             {
