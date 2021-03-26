@@ -16,7 +16,7 @@ namespace AgeChatServer
         void Logout(Client client);
         void Registration(Client client);
         void MessageToGlobalChat(string msg, Client sender);
-        void PersonalMessage(string msg, Client sender, Client receiver);
+        void PersonalMessage(string msg, Client sender);
         void SendGlobalMessageList(Client client);
         void SendMessageList(Client receiver, Client sender);
     }

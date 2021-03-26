@@ -129,7 +129,7 @@ namespace AgeChatServer
             //SendMessage(msg, receiver.GetClientSocket());
         }
 
-        public void PersonalMessage(string msg, Client sender, Client receiver)
+        public void PersonalMessage(string msg, Client sender)
         {
             ReceiveMessage(sender);
             DataBase db = new DataBase();
@@ -138,12 +138,12 @@ namespace AgeChatServer
             {
                 DateTime sendTime = new DateTime();
                 sendTime = DateTime.Now;
-                string sql = "INSERT INTO `MessageHistory` (message, sender, receiver, datetime) values (@msg, @sender, @receiver, @datetime) ";
+                string sql = "INSERT INTO `messages` (senderId, receiverId, messageText, datetime) values (@sender, @receiver, @msg, @datetime)";
                 MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
 
                 command.Parameters.Add("@msg", MySqlDbType.VarChar).Value = msg;
-                command.Parameters.Add("@sender", MySqlDbType.String).Value = sender;
-                command.Parameters.Add("@receiver", MySqlDbType.VarChar).Value = receiver;
+                command.Parameters.Add("@sender", MySqlDbType.Int32).Value = sender;
+                command.Parameters.Add("@receiver", MySqlDbType.Int32).Value = receiver;
                 command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
                 int rowCount = command.ExecuteNonQuery();
                 Console.WriteLine($"Message saved !\nRows affected = " + rowCount);
