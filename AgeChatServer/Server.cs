@@ -129,32 +129,72 @@ namespace AgeChatServer
             //SendMessage(msg, receiver.GetClientSocket());
         }
 
-        public void PersonalMessage(string msg, Client sender)
+        public void PersonalMessage(Client sender)
         {
-            ReceiveMessage(sender);
-            DataBase db = new DataBase();
-            db.OpenConnection();
-            try
+            if (sender.GetUser() != null)
             {
-                DateTime sendTime = new DateTime();
-                sendTime = DateTime.Now;
-                string sql = "INSERT INTO `messages` (senderId, receiverId, messageText, datetime) values (@sender, @receiver, @msg, @datetime)";
-                MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
+                string msg = ReceiveMessage(sender);
 
-                command.Parameters.Add("@msg", MySqlDbType.VarChar).Value = msg;
-                command.Parameters.Add("@sender", MySqlDbType.Int32).Value = sender;
-                command.Parameters.Add("@receiver", MySqlDbType.Int32).Value = receiver;
-                command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
-                int rowCount = command.ExecuteNonQuery();
-                Console.WriteLine($"Message saved !\nRows affected = " + rowCount);
-                FillUserList();
+                string receiver = ReceiveMessage(sender);
+
+                for (int i = 0; i < users.Count; i++)
+                {
+                    if (receiver == users[i].username)
+                    {
+                        DataBase db = new DataBase();
+                        db.OpenConnection();
+                        try
+                        {
+                            DateTime sendTime = new DateTime();
+                            sendTime = DateTime.Now;
+                            string sql = "INSERT INTO `messages` (senderId, receiverId, messageText, datetime) values (@sender, @receiver, @msg, @datetime)";
+                            MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
+
+                            command.Parameters.Add("@msg", MySqlDbType.VarChar).Value = msg;
+                            command.Parameters.Add("@sender", MySqlDbType.Int32).Value = sender.GetID();
+                            command.Parameters.Add("@receiver", MySqlDbType.Int32).Value = users[i].id;
+                            command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
+                            int rowCount = command.ExecuteNonQuery();
+                            Console.WriteLine($"Message saved !\nRows affected = " + rowCount);
+                            FillUserList();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Error: " + e);
+                        }
+                        db.CloseConnection();
+                        if (users[i].IsOnline())
+                        {
+                            for (int j = 0; j < connectedClients.Count; j++)
+                            {
+                                if (users[i].username == connectedClients[j].GetUsername())
+                                {
+                                    SendMessage(msg, connectedClients[j].GetClientSocket());
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Mismatch of statuses");
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Receiver offline");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("User cannot be found");
+                        SendMessage("User cannot be found", sender.GetClientSocket());
+                    }
+                }
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine("Error: " + e);
+                Console.WriteLine("Sender offline");
+                SendMessage("You have to log in first!", sender.GetClientSocket());
             }
-            db.CloseConnection();
-            SendMessage(msg, receiver.GetClientSocket());
         }
 
         public void Registration(Client client)
