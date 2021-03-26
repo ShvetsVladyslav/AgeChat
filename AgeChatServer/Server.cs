@@ -103,12 +103,58 @@ namespace AgeChatServer
 
         public void MessageToGlobalChat(string msg, Client sender)
         {
-            throw new NotImplementedException();
+            //ReceiveMessage(sender);
+            //DataBase db = new DataBase();
+            //db.OpenConnection();
+            //try
+            //{
+            //    DateTime sendTime = new DateTime();
+            //    sendTime = DateTime.Now;
+            //    string sql = "INSERT INTO `MessageHistory` (message, sender, receiver, datetime) values (@msg, @sender, @receiver, @datetime) ";
+            //    MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
+
+            //    command.Parameters.Add("@msg", MySqlDbType.VarChar).Value = msg;
+            //    command.Parameters.Add("@sender", MySqlDbType.String).Value = sender;
+            //    command.Parameters.Add("@receiver", MySqlDbType.VarChar).Value = receiver;
+            //    command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
+            //    int rowCount = command.ExecuteNonQuery();
+            //    Console.WriteLine($"Message saved !\nRows affected = " + rowCount);
+            //    FillUserList();
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine("Error: " + e);
+            //}
+            //db.CloseConnection();
+            //SendMessage(msg, receiver.GetClientSocket());
         }
 
         public void PersonalMessage(string msg, Client sender, Client receiver)
         {
-            throw new NotImplementedException();
+            ReceiveMessage(sender);
+            DataBase db = new DataBase();
+            db.OpenConnection();
+            try
+            {
+                DateTime sendTime = new DateTime();
+                sendTime = DateTime.Now;
+                string sql = "INSERT INTO `MessageHistory` (message, sender, receiver, datetime) values (@msg, @sender, @receiver, @datetime) ";
+                MySqlCommand command = new MySqlCommand(sql, db.GetConnection());
+
+                command.Parameters.Add("@msg", MySqlDbType.VarChar).Value = msg;
+                command.Parameters.Add("@sender", MySqlDbType.String).Value = sender;
+                command.Parameters.Add("@receiver", MySqlDbType.VarChar).Value = receiver;
+                command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
+                int rowCount = command.ExecuteNonQuery();
+                Console.WriteLine($"Message saved !\nRows affected = " + rowCount);
+                FillUserList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: " + e);
+            }
+            db.CloseConnection();
+            SendMessage(msg, receiver.GetClientSocket());
         }
 
         public void Registration(Client client)
