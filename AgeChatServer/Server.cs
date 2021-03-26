@@ -97,6 +97,7 @@ namespace AgeChatServer
             {
                 GoOffline(client);
                 client.DisconnectUser();
+                Console.WriteLine("client logged out");
             }
         }
 
