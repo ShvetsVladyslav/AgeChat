@@ -124,15 +124,20 @@ namespace AgeChatServer
 
                     for (int i = 0; i < connectedClients.Count; i++)
                     {
-                        if (connectedClients[i].GetClientSocket() != sender.GetClientSocket())
+                        if (connectedClients[i].GetUser() != null)
                         {
-                            SendMessage(msg, connectedClients[i].GetClientSocket());
+                            if (connectedClients[i].GetID() != sender.GetID())
+                            {
+                                SendMessage(sender.GetUsername(), connectedClients[i].GetClientSocket());
+                                SendMessage(msg, connectedClients[i].GetClientSocket());
+                            }
                         }
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("Error: " + e);
+                    SendMessage($"Error: message is abnormal!", sender.GetClientSocket());
                 }
                 db.CloseConnection();
             }
@@ -144,6 +149,7 @@ namespace AgeChatServer
 
         public void PersonalMessage(Client sender)
         {
+            Console.WriteLine("Personal message start");
             if (sender.GetUser() != null)
             {
                 string msg = ReceiveMessage(sender);
@@ -168,38 +174,35 @@ namespace AgeChatServer
                             command.Parameters.Add("@receiver", MySqlDbType.Int32).Value = users[i].id;
                             command.Parameters.Add("@datetime", MySqlDbType.DateTime).Value = sendTime;
                             int rowCount = command.ExecuteNonQuery();
-                            Console.WriteLine($"Message saved !\nRows affected = " + rowCount);
-                            FillUserList();
+                            Console.WriteLine($"Message saved!\nRows affected = " + rowCount);
                         }
                         catch (Exception e)
                         {
                             Console.WriteLine("Error: " + e);
+                            SendMessage($"Error: message is abnormal!", sender.GetClientSocket());
                         }
                         db.CloseConnection();
                         if (users[i].IsOnline())
                         {
                             for (int j = 0; j < connectedClients.Count; j++)
                             {
-                                if (users[i].username == connectedClients[j].GetUsername())
+                                if (connectedClients[j].GetUser() != null)
                                 {
-                                    SendMessage(msg, connectedClients[j].GetClientSocket());
+                                    if (users[i].username == connectedClients[j].GetUsername())
+                                    {
+                                        SendMessage(sender.GetUsername(), connectedClients[i].GetClientSocket());
+                                        SendMessage(msg, connectedClients[j].GetClientSocket());
+                                        Console.WriteLine("message sent to " + receiver);
+                                        break;
+                                    }
                                 }
-                                else
-                                {
-                                    Console.WriteLine("Mismatch of statuses");
-                                }
-
                             }
                         }
                         else
                         {
                             Console.WriteLine("Receiver offline");
+                            break;
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine("User cannot be found");
-                        SendMessage("User cannot be found", sender.GetClientSocket());
                     }
                 }
             }
@@ -256,6 +259,14 @@ namespace AgeChatServer
             var receivedString = ReceiveMessage(client);
             IPAddress ip = IPAddress.Parse(((IPEndPoint)client.GetClientSocket().RemoteEndPoint).Address.ToString());
 
+            for (int i = 0; i < connectedClients.Count; i++)
+            {
+                if (client.GetClientSocket() == connectedClients[i].GetClientSocket())
+                {
+                    client = connectedClients[i];
+                }
+            }
+
             if (connectedClients.Contains(client))
             {
                 Console.WriteLine($"Client {ip}: {receivedString}");
@@ -273,6 +284,14 @@ namespace AgeChatServer
             {
                 Logout(client);
             }
+            else if (receivedString == "gm")
+            {
+                MessageToGlobalChat(client);
+            }
+            else if (receivedString == "pm")
+            {
+                PersonalMessage(client);
+            }
             else
             {
                 Console.WriteLine("Unknown command!");
@@ -280,12 +299,12 @@ namespace AgeChatServer
             }
         }
 
-        public void SendGlobalMessageList(Client client)
+        public void SendGlobalMessageHistory(Client client)
         {
             throw new NotImplementedException();
         }
 
-        public void SendMessageList(Client receiver, Client sender)
+        public void SendMessageHistory(Client receiver, Client sender)
         {
             throw new NotImplementedException();
         }
