@@ -296,6 +296,18 @@ namespace AgeChatServer
             {
                 SendGlobalMessageHistory(client);
             }
+            else if (receivedString == "pchistory")
+            {
+                SendMessageHistory(client);
+            }
+            else if (receivedString == "showAll")
+            {
+                ShowAllUsers(client);
+            }
+            else if (receivedString == "showOn")
+            {
+                ShowOnlineUsers(client);
+            }
             else if (receivedString == "")
             {
                 Disconnect(client);
@@ -340,9 +352,47 @@ namespace AgeChatServer
             }
         }
 
-        public void SendMessageHistory(Client receiver, Client sender)
+        public void SendMessageHistory(Client sender)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Sending private chat history");
+            if (sender.GetUser() != null)
+            {
+                string receiver = ReceiveMessage(sender);
+                for (int i = 0; i < users.Count; i++)
+                {
+                    if (receiver == users[i].username)
+                    {
+                        int receiverId = users[i].id;
+                        DataBase db = new DataBase();
+                        MySqlCommand command = new MySqlCommand("SELECT * FROM messages WHERE receiverId = '" + receiverId + "' AND senderId = " + sender.GetID()
+                            + " OR receiverId = '" + sender.GetID() + "' AND senderId = " + receiverId, db.GetConnection());
+                        MySqlDataReader myDataReader;
+                        db.OpenConnection();
+
+                        myDataReader = command.ExecuteReader();
+                        while (myDataReader.Read())
+                        {
+                            string senderUsername = "";
+                            for (int j = 0; j < users.Count; j++)
+                            {
+                                if (myDataReader.GetInt32(1) == users[j].id)
+                                {
+                                    senderUsername = users[j].username;
+                                }
+                            }
+                            string line = $"{senderUsername}: {myDataReader.GetString(3)}";
+                            SendMessage(line, sender.GetClientSocket());
+                        }
+
+                        db.CloseConnection();
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                SendMessage("You have to log in first!", sender.GetClientSocket());
+            }
         }
 
         public void HandShake(Socket clientSocket)
@@ -366,6 +416,40 @@ namespace AgeChatServer
                 response += eol;
 
                 clientSocket.Send(Encoding.UTF8.GetBytes(response));
+            }
+        }
+        public void ShowOnlineUsers(Client client)
+        {
+            if (client.GetUser() != null)
+            {
+                for (int i = 0; i < users.Count; i++)
+                {
+                    if (users[i].IsOnline() && users[i].id != client.GetID())
+                    {
+                        SendMessage(users[i].username, client.GetClientSocket());
+                    }
+                }
+            }
+            else
+            {
+                SendMessage("You have to log in first!", client.GetClientSocket());
+            }
+        }
+        public void ShowAllUsers(Client client)
+        {
+            if (client.GetUser() != null)
+            {
+                for (int i = 0; i < users.Count; i++)
+                {
+                    if (users[i].id != client.GetID())
+                    {
+                        SendMessage(users[i].username, client.GetClientSocket());
+                    }
+                }
+            }
+            else
+            {
+                SendMessage("You have to log in first!", client.GetClientSocket());
             }
         }
         private string ReceiveMessage(Client client)

@@ -18,6 +18,8 @@ namespace AgeChatServer
         void MessageToGlobalChat(Client sender);
         void PersonalMessage(Client sender);
         void SendGlobalMessageHistory(Client client);
-        void SendMessageHistory(Client receiver, Client sender);
+        void SendMessageHistory(Client sender);
+        void ShowOnlineUsers(Client client);
+        void ShowAllUsers(Client client);
     }
 }
