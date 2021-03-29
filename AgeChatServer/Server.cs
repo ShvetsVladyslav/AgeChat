@@ -267,7 +267,7 @@ namespace AgeChatServer
                 }
             }
 
-            if (connectedClients.Contains(client))
+            if (connectedClients.Contains(client) && receivedString != "")
             {
                 Console.WriteLine($"Client {ip}: {receivedString}");
             }
@@ -292,6 +292,14 @@ namespace AgeChatServer
             {
                 PersonalMessage(client);
             }
+            else if (receivedString == "gchistory")
+            {
+                SendGlobalMessageHistory(client);
+            }
+            else if (receivedString == "")
+            {
+                Disconnect(client);
+            }
             else
             {
                 Console.WriteLine("Unknown command!");
@@ -301,7 +309,35 @@ namespace AgeChatServer
 
         public void SendGlobalMessageHistory(Client client)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Sending global chat history");
+            if (client.GetUser() != null)
+            {
+                DataBase db = new DataBase();
+                MySqlCommand command = new MySqlCommand("SELECT * FROM `globalmessages`", db.GetConnection());
+                MySqlDataReader myDataReader;
+                db.OpenConnection();
+
+                myDataReader = command.ExecuteReader();
+                while (myDataReader.Read())
+                {
+                    string username = "";
+                    for (int i = 0; i < users.Count; i++)
+                    {
+                        if (myDataReader.GetInt32(1) == users[i].id)
+                        {
+                            username = users[i].username;
+                        }
+                    }
+                    string line = $"{username}: {myDataReader.GetString(2)}";
+                    SendMessage(line, client.GetClientSocket());
+                }
+
+                db.CloseConnection();
+            }
+            else
+            {
+                SendMessage("You have to log in first!", client.GetClientSocket());
+            }
         }
 
         public void SendMessageHistory(Client receiver, Client sender)
@@ -343,13 +379,7 @@ namespace AgeChatServer
                 client.GetClientSocket().Receive(receivedData);
                 if ((receivedData[0] & (byte)Opcode.CloseConnection) == (byte)Opcode.CloseConnection)
                 {
-                    // Close connection request.
-                    Console.WriteLine("Client with ip: " + ip + " disconnected!");
-                    client.GetClientSocket().Close();
-                    //setting offline status to user
-                    GoOffline(client);
-                    //
-                    connectedClients.Remove(client);
+                    Disconnect(client);
                     return "";
                 }
                 else
@@ -370,15 +400,15 @@ namespace AgeChatServer
             users = new List<User>();
             DataBase db = new DataBase();
             MySqlCommand command = new MySqlCommand("SELECT * FROM `users`", db.GetConnection());
-            MySqlDataReader MyDataReader;
+            MySqlDataReader myDataReader;
             db.OpenConnection();
 
-            MyDataReader = command.ExecuteReader();
-            while (MyDataReader.Read())
+            myDataReader = command.ExecuteReader();
+            while (myDataReader.Read())
             {
                 users.Add(new User());
-                users[users.Count - 1].id = MyDataReader.GetInt32(0);
-                users[users.Count - 1].username = MyDataReader.GetString(3);
+                users[users.Count - 1].id = myDataReader.GetInt32(0);
+                users[users.Count - 1].username = myDataReader.GetString(3);
             }
 
             db.CloseConnection();
@@ -414,6 +444,17 @@ namespace AgeChatServer
                     }
                 }
             }
+        }
+        private void Disconnect(Client client)
+        {
+            IPAddress ip = IPAddress.Parse(((IPEndPoint)client.GetClientSocket().RemoteEndPoint).Address.ToString());
+            // Close connection request.
+            Console.WriteLine("Client with ip: " + ip + " disconnected!");
+            client.GetClientSocket().Close();
+            //setting offline status to user
+            GoOffline(client);
+            //
+            connectedClients.Remove(client);
         }
     }
 }
