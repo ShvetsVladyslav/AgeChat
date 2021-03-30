@@ -256,9 +256,6 @@ namespace AgeChatServer
 
         public void Request(Client client)
         {
-            var receivedString = ReceiveMessage(client);
-            IPAddress ip = IPAddress.Parse(((IPEndPoint)client.GetClientSocket().RemoteEndPoint).Address.ToString());
-
             for (int i = 0; i < connectedClients.Count; i++)
             {
                 if (client.GetClientSocket() == connectedClients[i].GetClientSocket())
@@ -266,6 +263,9 @@ namespace AgeChatServer
                     client = connectedClients[i];
                 }
             }
+
+            var receivedString = ReceiveMessage(client);
+            IPAddress ip = IPAddress.Parse(((IPEndPoint)client.GetClientSocket().RemoteEndPoint).Address.ToString());
 
             if (connectedClients.Contains(client) && receivedString != "")
             {
