@@ -30,7 +30,6 @@ namespace AgeChatServer
             while (true)
             {
                 var clientSocket = listeningSocket.Accept();
-                Console.WriteLine("not started yet");
                 var nextThread = new Thread(new ThreadStart(() =>
                 {
                     connectedClients.Add(new Client(clientSocket));
@@ -539,6 +538,7 @@ namespace AgeChatServer
             GoOffline(client);
             //
             connectedClients.Remove(client);
+            Thread.CurrentThread.Abort();
         }
     }
 }
