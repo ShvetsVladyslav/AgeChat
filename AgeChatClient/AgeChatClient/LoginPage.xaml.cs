@@ -15,14 +15,16 @@ namespace AgeChatClient
     {
         WebSocket ws;
         List<string> messages;
-        Page mainPage;
-        public LoginPage(WebSocket ws, Page p)
+        public LoginPage()
         {
             InitializeComponent();
-            mainPage = p;
             messages = new List<string>();
-            this.ws = ws;
+
+            ws = new WebSocket("ws://192.168.0.109:8080/");
+            ws.EnableAutoSendPing = false;
             ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(ReceivedMessage);
+
+            ws.Open();
         }
 
         protected override void OnAppearing()
@@ -60,28 +62,38 @@ namespace AgeChatClient
                         ws.Send(password.Text);
 
                         int count = 0;
-                        while (messages.Count == 0)
+                        await Task.Run(() =>
                         {
-                            if (count == 500)
+                            while (messages.Count == 0)
                             {
-                                await DisplayAlert("Error", "Server failed to respond!", "Ok");
+                                if (count == 500)
+                                {
+                                    DisplayAlert("Error", "Server failed to respond!", "Ok");
+                                }
+                                Thread.Sleep(10);
+                                count++;
                             }
-                            Thread.Sleep(10);
-                            count++;
-                        }
+                        });
 
                         if (messages[0] == "user logged in")
                         {
-                            messages.Clear();
-                            ws.Send("getUsername");
-                            while (messages.Count == 0)
+                            await Task.Run(() =>
                             {
-                                Thread.Sleep(10);
-                            }
-                            Application.Current.Properties["username"] = messages[0];
-                            Application.Current.Properties["isLoggedIn"] = "true";
+                                messages.Clear();
+                                ws.Send("getUsername");
+                                while (messages.Count == 0)
+                                {
+                                    Thread.Sleep(10);
+                                }
+                                Application.Current.Properties["username"] = messages[0];
+                            });
 
-                            await Navigation.PopModalAsync(true);
+                            Application.Current.MainPage = new NavigationPage(new MainPage(ws))
+                            {
+                                //BarBackgroundColor = Color.LimeGreen,
+                                BarBackgroundColor = Color.Transparent,
+                                BarTextColor = Color.Black
+                            };
                         }
                         else
                         {

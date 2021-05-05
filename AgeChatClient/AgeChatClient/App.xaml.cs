@@ -10,14 +10,7 @@ namespace AgeChatClient
         {
             InitializeComponent();
 
-            NavigationPage navigation = new NavigationPage(new MainPage())
-            {
-                //BarBackgroundColor = Color.LimeGreen,
-                BarBackgroundColor = Color.Transparent,
-                BarTextColor = Color.Black
-            };
-
-            MainPage = navigation;
+            MainPage = new LoginPage();
         }
 
         protected override void OnStart()

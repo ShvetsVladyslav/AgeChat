@@ -16,24 +16,17 @@ namespace AgeChatClient
     {
         WebSocket ws;
         List<string> messages;
-        public MainPage()
+        public MainPage(WebSocket ws)
         {
             InitializeComponent();
             messages = new List<string>();
-            Application.Current.Properties["isLoggedIn"] = "false";
-
-            ws = new WebSocket("ws://192.168.0.109:8080/");
-            ws.EnableAutoSendPing = false;
-            ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(ReceivedMessage);
-
-            ws.Open();
-
-            LoginPage loginPage = new LoginPage(ws, this);
-            Navigation.PushModalAsync(loginPage, false);
+            this.ws = ws;
         }
 
         protected override void OnAppearing()
         {
+            DisplayAlert(Application.Current.Properties["username"].ToString(), "good", "ok");
+            Title = Application.Current.Properties["username"].ToString();
         }
 
         private void ReceivedMessage(object sender, MessageReceivedEventArgs e)
@@ -56,13 +49,8 @@ namespace AgeChatClient
 
         private void btnDisconnect_click(object sender, EventArgs e)
         {
-            if (Application.Current.Properties["isLoggedIn"].ToString() == "true")
-            {
-                DisplayAlert(Application.Current.Properties["username"].ToString(), "good", "ok");
-                Title = Application.Current.Properties["username"].ToString();
-            }
-            /*ws.Close();
-            Environment.Exit(0);*/
+            ws.Close();
+            Environment.Exit(0);
         }
 
         private void btnSend_click(object sender, EventArgs e)
