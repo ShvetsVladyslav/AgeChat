@@ -9,7 +9,17 @@
             <Button Text="Sign out" FontSize="15" BackgroundColor="LightGreen" Clicked ="ButtonLogout_Clicked"></Button>
             <Button Text="Exit" FontSize="15" BackgroundColor="LightGreen" Clicked ="ButtonExit_Clicked"></Button>
         </StackLayout>
-        <ListView ItemsSource="{Binding userCollection}"></ListView>
+        <ListView ItemsSource="{Binding userCollection}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout HorizontalOptions="FillAndExpand"  BackgroundColor="{Binding color}">
+                            <Label Text="{Binding username}" TextColor="Navy" FontSize="20"/>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </StackLayout>
 
 </ContentPage>
