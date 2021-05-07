@@ -22,59 +22,41 @@ namespace AgeChatClient
             messages = new List<string>();
             this.ws = ws;
             ws.MessageReceived += ReceivedMessage;
+            this.BindingContext = new Chats(ws);
         }
 
         protected override void OnAppearing()
         {
-            DisplayAlert(Application.Current.Properties["username"].ToString(), "good", "ok");
-            Title = Application.Current.Properties["username"].ToString();
+            labelUsername.Text = $"Logged in as {App.Current.Properties["username"]}.";
         }
-
         private void ReceivedMessage(object sender, MessageReceivedEventArgs e)
         {
             messages.Add(e.Message);
         }
-
-        private void Button_Clicked(object sender, EventArgs e)
-        {
-            if (messages.Count != 0)
-            {
-                lbl1.Text = messages[0].ToString();
-                messages.RemoveAt(0);
-            }
-            else
-            {
-                lbl1.Text = "";
-            }
-        }
-
-        private void btnDisconnect_click(object sender, EventArgs e)
-        {
-            ws.Close();
-            Environment.Exit(0);
-        }
-
-        private void btnSend_click(object sender, EventArgs e)
-        {
-            if (ws != null && ws.State == WebSocketState.Open && text.Text.Length != 0)
-            {
-                ws.Send(text.Text);
-                Thread.Sleep(10);
-                if (messages.Count != 0)
-                {
-                    lbl1.Text = messages[0].ToString();
-                    messages.RemoveAt(0);
-                }
-                else
-                {
-                    lbl1.Text = "";
-                }
-            }
-        }
-
         protected override bool OnBackButtonPressed()
         {
             return true;
         }
+        private void ButtonExit_Clicked(object sender, EventArgs e)
+        {
+            ws.Close();
+            Environment.Exit(0);
+        }
+        private void ButtonLogout_Clicked(object sender, EventArgs e)
+        {
+            App.Current.Properties["username"] = "";
+            ws.Send("logout");
+            Application.Current.MainPage = new LoginPage(ws);
+        }
     }
 }
+
+/*if (messages.Count != 0)
+{
+    lbl1.Text = messages[0].ToString();
+    messages.RemoveAt(0);
+}
+else
+{
+    lbl1.Text = "";
+}*/

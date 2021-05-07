@@ -28,6 +28,15 @@ namespace AgeChatClient
             ws.Open();
         }
 
+        public LoginPage(WebSocket ws)
+        {
+            InitializeComponent();
+            messages = new List<string>();
+
+            this.ws = ws;
+            ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(ReceivedMessage);
+        }
+
         protected override void OnAppearing()
         {
             logo.Source = ImageSource.FromResource("AgeChatClient.Images.Logo.png");
@@ -90,11 +99,11 @@ namespace AgeChatClient
                                 Application.Current.Properties["username"] = messages[0];
                             });
 
-                            Application.Current.MainPage = new NavigationPage(new MainPage(ws))
+                            Application.Current.MainPage = new NavigationPage(new MainPage(ws) { Title = "Chats" })
                             {
                                 //BarBackgroundColor = Color.LimeGreen,
-                                BarBackgroundColor = Color.Transparent,
-                                BarTextColor = Color.Black
+                                BarBackgroundColor = Color.FromHex("#139e2f"),
+                                BarTextColor = Color.White,
                             };
                         }
                         else
