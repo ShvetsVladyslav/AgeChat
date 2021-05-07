@@ -207,7 +207,6 @@ namespace AgeChatServer
             }
             else
             {
-                Console.WriteLine("Sender offline");
                 SendMessage("You have to log in first!", sender.GetClientSocket());
             }
         }
@@ -307,6 +306,10 @@ namespace AgeChatServer
             {
                 ShowOnlineUsers(client);
             }
+            else if (receivedString == "getUsername")
+            {
+                SendUsername(client);
+            }
             else if (receivedString == "")
             {
                 Disconnect(client);
@@ -350,7 +353,6 @@ namespace AgeChatServer
                 SendMessage("You have to log in first!", client.GetClientSocket());
             }
         }
-
         public void SendMessageHistory(Client sender)
         {
             Console.WriteLine("Sending private chat history");
@@ -393,7 +395,6 @@ namespace AgeChatServer
                 SendMessage("You have to log in first!", sender.GetClientSocket());
             }
         }
-
         public void HandShake(Socket clientSocket)
         {
             var receivedData = new byte[1000000];
@@ -477,6 +478,18 @@ namespace AgeChatServer
             FrameParser frameParser = new FrameParser();
             var dataToSend = frameParser.CreateFrameFromString(message);
             receiver.Send(dataToSend);
+        }
+        private void SendUsername(Client client)
+        {
+            Console.WriteLine("Sending UserName");
+            if (client.GetUser() != null)
+            {
+                SendMessage(client.GetUsername(), client.GetClientSocket());
+            }
+            else
+            {
+                SendMessage("You have to log in first!", client.GetClientSocket());
+            }
         }
         private void FillUserList()
         {
