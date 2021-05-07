@@ -21,6 +21,7 @@ namespace AgeChatClient
             InitializeComponent();
             messages = new List<string>();
             this.ws = ws;
+            ws.MessageReceived += ReceivedMessage;
         }
 
         protected override void OnAppearing()

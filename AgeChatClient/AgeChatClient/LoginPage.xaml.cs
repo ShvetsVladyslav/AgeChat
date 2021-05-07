@@ -15,6 +15,7 @@ namespace AgeChatClient
     {
         WebSocket ws;
         List<string> messages;
+        bool isLoggedIn = false;
         public LoginPage()
         {
             InitializeComponent();
@@ -48,7 +49,7 @@ namespace AgeChatClient
 
         private async void ButtonLogIn_ClickedAsync(object sender, EventArgs e)
         {
-            if (ws != null && ws.State == WebSocketState.Open)
+            if (ws.State == WebSocketState.Open && !isLoggedIn)
             {
                 if (login.Text != null && password.Text != null)
                 {
@@ -77,6 +78,7 @@ namespace AgeChatClient
 
                         if (messages[0] == "user logged in")
                         {
+                            isLoggedIn = true;
                             await Task.Run(() =>
                             {
                                 messages.Clear();
