@@ -51,14 +51,29 @@ namespace AgeChatClient
             Thread.Sleep(50);
             for (int i = 1; i < users.Count; i++)
             {
+                bool isStillOnline = false;
                 for (int j = 0; j < messages.Count; j++)
                 {
-                    if (users[i].username == messages[j] && users[i].color == Color.LightGray)
+                    if (users[i].username == messages[j])
                     {
-                        users[i].color = Color.LightGreen;
-                        messages.RemoveAt(j);
-                        break;
+                        if(users[i].color == Color.LightGray)
+                        {
+                            users[i].color = Color.LightGreen;
+                            isStillOnline = true;
+                            messages.RemoveAt(j);
+                            break;
+                        }
+                        else if (users[i].color == Color.LightGreen)
+                        {
+                            isStillOnline = true;
+                            messages.RemoveAt(j);
+                            break;
+                        }
                     }
+                }
+                if (!isStillOnline)
+                {
+                    users[i].color = Color.LightGray;
                 }
             }
             SortUsers();
