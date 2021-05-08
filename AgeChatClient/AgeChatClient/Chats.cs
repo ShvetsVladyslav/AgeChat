@@ -58,7 +58,10 @@ namespace AgeChatClient
                     {
                         if(users[i].color == Color.LightGray)
                         {
-                            users[i].color = Color.LightGreen;
+                            User tmp = new User(users[i].username);
+                            tmp.color = Color.LightGreen;
+                            users.RemoveAt(i);
+                            users.Insert(i, tmp);
                             isStillOnline = true;
                             messages.RemoveAt(j);
                             break;
@@ -73,7 +76,10 @@ namespace AgeChatClient
                 }
                 if (!isStillOnline)
                 {
-                    users[i].color = Color.LightGray;
+                    User tmp = new User(users[i].username);
+                    tmp.color = Color.LightGray;
+                    users.RemoveAt(i);
+                    users.Insert(i, tmp);
                 }
             }
             SortUsers();
