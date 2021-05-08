@@ -9,12 +9,15 @@
             <Button Text="Sign out" FontSize="15" BackgroundColor="LightGreen" Clicked ="ButtonLogout_Clicked"></Button>
             <Button Text="Exit" FontSize="15" BackgroundColor="LightGreen" Clicked ="ButtonExit_Clicked"></Button>
         </StackLayout>
-        <ListView ItemsSource="{Binding userCollection}">
+        <ListView ItemsSource="{Binding userCollection}" SeparatorVisibility="Default" SeparatorColor="Black" RowHeight="70">
+            <ListView.Header>
+                <Label Text="Choose chat" Padding="12, 0, 0, 0" FontSize="18"></Label>
+            </ListView.Header>
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
                         <StackLayout HorizontalOptions="FillAndExpand"  BackgroundColor="{Binding color}">
-                            <Label Text="{Binding username}" TextColor="Navy" FontSize="20"/>
+                            <Label Text="{Binding username}" TextColor="Navy" FontSize="25" VerticalOptions="CenterAndExpand" Padding="12"/>
                         </StackLayout>
                     </ViewCell>
                 </DataTemplate>
