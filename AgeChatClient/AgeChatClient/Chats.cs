@@ -13,6 +13,7 @@ namespace AgeChatClient
     {
         WebSocket ws;
         List<string> messages;
+        List<string> onlineUsers;
         ObservableCollection<User> users;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -25,6 +26,10 @@ namespace AgeChatClient
             ws.MessageReceived += ReceivedMessage;
             users.Add(new User("Global Chat"));
             users[0].color = Color.LightGreen;
+
+            onlineUsers = new List<string>();
+            onlineUsers.Add(users[0].username);
+
             GetUsers();
         }
 
@@ -49,40 +54,48 @@ namespace AgeChatClient
             messages.Clear();
             ws.Send("showOn");
             Thread.Sleep(50);
-            for (int i = 1; i < users.Count; i++)
+            if (!CheckEquality(onlineUsers, messages))
             {
-                bool isStillOnline = false;
-                for (int j = 0; j < messages.Count; j++)
+                onlineUsers.Clear();
+                for (int i = 0; i < messages.Count; i++)
                 {
-                    if (users[i].username == messages[j])
+                    onlineUsers.Add(messages[i]);
+                }
+                for (int i = 1; i < users.Count; i++)
+                {
+                    bool isStillOnline = false;
+                    for (int j = 0; j < messages.Count; j++)
                     {
-                        if(users[i].color == Color.LightGray)
+                        if (users[i].username == messages[j])
                         {
-                            User tmp = new User(users[i].username);
-                            tmp.color = Color.LightGreen;
-                            users.RemoveAt(i);
-                            users.Insert(i, tmp);
-                            isStillOnline = true;
-                            messages.RemoveAt(j);
-                            break;
-                        }
-                        else if (users[i].color == Color.LightGreen)
-                        {
-                            isStillOnline = true;
-                            messages.RemoveAt(j);
-                            break;
+                            if (users[i].color == Color.LightGray)
+                            {
+                                User tmp = new User(users[i].username);
+                                tmp.color = Color.LightGreen;
+                                users.RemoveAt(i);
+                                users.Insert(i, tmp);
+                                isStillOnline = true;
+                                messages.RemoveAt(j);
+                                break;
+                            }
+                            else if (users[i].color == Color.LightGreen)
+                            {
+                                isStillOnline = true;
+                                messages.RemoveAt(j);
+                                break;
+                            }
                         }
                     }
+                    if (!isStillOnline)
+                    {
+                        User tmp = new User(users[i].username);
+                        tmp.color = Color.LightGray;
+                        users.RemoveAt(i);
+                        users.Insert(i, tmp);
+                    }
                 }
-                if (!isStillOnline)
-                {
-                    User tmp = new User(users[i].username);
-                    tmp.color = Color.LightGray;
-                    users.RemoveAt(i);
-                    users.Insert(i, tmp);
-                }
+                SortUsers();
             }
-            SortUsers();
         }
         
         public ObservableCollection<User> userCollection 
@@ -125,6 +138,22 @@ namespace AgeChatClient
             {
                 handler(this, new PropertyChangedEventArgs(name));
             }
+        }
+
+        private bool CheckEquality(List<string> list1, List<string> list2)
+        {
+            if (list1.Count == list2.Count)
+            {
+                for (int i = 0; i < list1.Count; i++)
+                {
+                    if (list1[i] != list2[i])
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
     }
 
