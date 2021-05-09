@@ -9,7 +9,7 @@
             <Button Text="Sign out" FontSize="15" BackgroundColor="LightGreen" Clicked ="ButtonLogout_Clicked"></Button>
             <Button Text="Exit" FontSize="15" BackgroundColor="LightGreen" Clicked ="ButtonExit_Clicked"></Button>
         </StackLayout>
-        <ListView ItemsSource="{Binding userCollection}" SeparatorVisibility="Default" SeparatorColor="Black" RowHeight="70">
+        <ListView ItemsSource="{Binding userCollection}" SeparatorVisibility="Default" SeparatorColor="Black" RowHeight="70" ItemTapped="ChatLabel_Tapped">
             <ListView.Header>
                 <Label Text="Choose chat" Padding="12, 0, 0, 0" FontSize="18"></Label>
             </ListView.Header>

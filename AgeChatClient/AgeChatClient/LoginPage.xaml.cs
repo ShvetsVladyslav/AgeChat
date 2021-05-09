@@ -101,7 +101,6 @@ namespace AgeChatClient
 
                             Application.Current.MainPage = new NavigationPage(new MainPage(ws) { Title = "Chats" })
                             {
-                                //BarBackgroundColor = Color.LimeGreen,
                                 BarBackgroundColor = Color.FromHex("#139e2f"),
                                 BarTextColor = Color.White,
                             };

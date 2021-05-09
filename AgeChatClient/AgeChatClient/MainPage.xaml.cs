@@ -17,7 +17,7 @@ namespace AgeChatClient
         WebSocket ws;
         List<string> messages;
         Chats chatsPage;
-        bool isTimerEnabled = true;
+        bool isTimerEnabled;
         public MainPage(WebSocket ws)
         {
             InitializeComponent();
@@ -30,6 +30,8 @@ namespace AgeChatClient
 
         protected override void OnAppearing()
         {
+            base.OnAppearing();
+            isTimerEnabled = true;
             labelUsername.Text = $"Logged in as {App.Current.Properties["username"]}.";
             Device.StartTimer(TimeSpan.FromSeconds(10), TimerTick);
         }
@@ -60,8 +62,26 @@ namespace AgeChatClient
         }
         private bool TimerTick()
         {
-            chatsPage.UpdateOnlineUsers();
+            if (isTimerEnabled)
+            {
+                chatsPage.UpdateOnlineUsers();
+            }
             return isTimerEnabled;
+        }
+
+        private void ChatLabel_Tapped(object sender, ItemTappedEventArgs e)
+        {
+            User user = (User)e.Item;
+            bool isOnline = false;
+            /*if (user.color == Color.LightGray)
+            {
+                isOnline = false;
+            }
+            else if (user.color == Color.LightGreen)
+            {
+                isOnline = true;
+            }*/
+            Navigation.PushAsync(new ChatPage(ws, user.username));
         }
     }
 }
