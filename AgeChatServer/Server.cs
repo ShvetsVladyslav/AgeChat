@@ -127,7 +127,8 @@ namespace AgeChatServer
                         {
                             if (connectedClients[i].GetID() != sender.GetID())
                             {
-                                SendMessage(sender.GetUsername(), connectedClients[i].GetClientSocket());
+                                msg = sender.GetUsername() + ": " + msg;
+                                //SendMessage(sender.GetUsername(), connectedClients[i].GetClientSocket());
                                 SendMessage(msg, connectedClients[i].GetClientSocket());
                             }
                         }
