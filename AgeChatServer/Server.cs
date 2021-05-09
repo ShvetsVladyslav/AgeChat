@@ -189,7 +189,7 @@ namespace AgeChatServer
                                 {
                                     if (users[i].username == connectedClients[j].GetUsername())
                                     {
-                                        SendMessage(sender.GetUsername(), connectedClients[i].GetClientSocket());
+                                        msg = sender.GetUsername() + ": " + msg;
                                         SendMessage(msg, connectedClients[j].GetClientSocket());
                                         Console.WriteLine("message sent to " + receiver);
                                         break;
