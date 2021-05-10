@@ -15,6 +15,7 @@ namespace AgeChatClient
     public partial class ChatPage : ContentPage
     {
         WebSocket ws;
+        bool isScrolling = false;
         public ObservableCollection<Msg> messages { get; set; }
         public ChatPage(WebSocket ws, string username)
         {
@@ -40,12 +41,6 @@ namespace AgeChatClient
             {
                 ws.Send("gchistory");
             }
-            Task.Run(() =>
-            {
-                Thread.Sleep(50);
-                if (messages.Count != 0)
-                    Dispatcher.BeginInvokeOnMainThread(() => messageList.ScrollTo(messages[messages.Count - 1], ScrollToPosition.End, true));
-            });
         }
 
         private void ReceivedMessage(object sender, MessageReceivedEventArgs e)
@@ -60,6 +55,47 @@ namespace AgeChatClient
             else
             {
                 Dispatcher.BeginInvokeOnMainThread(() => messages.Add(new Msg(e.Message)));
+            }
+            Task.Run(() =>
+            {
+                isScrolling = true;
+                Thread.Sleep(50);
+                if (messages.Count != 0 && !isScrolling)
+                {
+                    Dispatcher.BeginInvokeOnMainThread(() => messageList.ScrollTo(messages[messages.Count - 1], ScrollToPosition.End, true));
+                }
+                isScrolling = false;
+            });
+        }
+
+        private void ButtonSend_Clicked(object sender, EventArgs e)
+        {
+            if (messageText.Text != null)
+            {
+                if (messageText.Text.Length != 0)
+                {
+                    string messageToSend = messageText.Text.Trim();
+
+                    if (Title != "Global Chat")
+                    {
+                        messages.Add(new Msg(App.Current.Properties["username"].ToString() + ": " + messageToSend));
+                        messageText.Text = "";
+                        ws.Send("pm");
+                        Thread.Sleep(5);
+                        ws.Send(messageToSend);
+                        Thread.Sleep(5);
+                        ws.Send(Title);
+                    }
+                    else
+                    {
+                        messages.Add(new Msg(App.Current.Properties["username"].ToString() + ": " + messageToSend));
+                        messageText.Text = "";
+                        ws.Send("gm");
+                        Thread.Sleep(5);
+                        ws.Send(messageToSend);
+                    }
+                    messageList.ScrollTo(messages[messages.Count - 1], ScrollToPosition.End, true);
+                }
             }
         }
     }

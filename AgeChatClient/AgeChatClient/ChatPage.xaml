@@ -16,8 +16,8 @@
                 </ListView.ItemTemplate>
             </ListView>
             <StackLayout Orientation="Horizontal" Padding="20">
-                <Entry HorizontalOptions="FillAndExpand"></Entry>
-                <Button Text="Send"></Button>
+                <Entry HorizontalOptions="FillAndExpand" x:Name="messageText"></Entry>
+                <Button Text="Send" Clicked="ButtonSend_Clicked"></Button>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>
