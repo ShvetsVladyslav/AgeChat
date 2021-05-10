@@ -58,13 +58,17 @@ namespace AgeChatClient
             }
             Task.Run(() =>
             {
-                isScrolling = true;
-                Thread.Sleep(50);
-                if (messages.Count != 0 && !isScrolling)
+                if (!isScrolling)
                 {
-                    Dispatcher.BeginInvokeOnMainThread(() => messageList.ScrollTo(messages[messages.Count - 1], ScrollToPosition.End, true));
+                    isScrolling = true;
+                    Thread.Sleep(50);
+                    Dispatcher.BeginInvokeOnMainThread(() => DisplayAlert("", "Scrolling", "Ok"));
+                    if (messages.Count != 0)
+                    {
+                        Dispatcher.BeginInvokeOnMainThread(() => messageList.ScrollTo(messages[messages.Count - 1], ScrollToPosition.End, true));
+                    }
+                    isScrolling = false;
                 }
-                isScrolling = false;
             });
         }
 
