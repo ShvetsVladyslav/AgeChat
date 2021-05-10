@@ -137,7 +137,7 @@ namespace AgeChatServer
                 catch (Exception e)
                 {
                     Console.WriteLine("Error: " + e);
-                    SendMessage($"Error: message is abnormal!", sender.GetClientSocket());
+                    //SendMessage($"Error: message is abnormal!", sender.GetClientSocket());
                 }
                 db.CloseConnection();
             }
