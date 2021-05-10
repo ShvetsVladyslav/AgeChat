@@ -61,8 +61,7 @@ namespace AgeChatClient
                 if (!isScrolling)
                 {
                     isScrolling = true;
-                    Thread.Sleep(50);
-                    Dispatcher.BeginInvokeOnMainThread(() => DisplayAlert("", "Scrolling", "Ok"));
+                    Thread.Sleep(20);
                     if (messages.Count != 0)
                     {
                         Dispatcher.BeginInvokeOnMainThread(() => messageList.ScrollTo(messages[messages.Count - 1], ScrollToPosition.End, true));
