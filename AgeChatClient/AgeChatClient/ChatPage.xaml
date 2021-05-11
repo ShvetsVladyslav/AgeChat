@@ -4,7 +4,7 @@
              x:Class="AgeChatClient.ChatPage">
     <ContentPage.Content>
         <StackLayout>
-            <ListView x:Name="messageList" ItemsSource="{Binding messages}" VerticalOptions="Center" SelectionMode="None" SeparatorVisibility="None">
+            <ListView x:Name="messageList" ItemsSource="{Binding messages}" VerticalOptions="Center" SelectionMode="None" SeparatorVisibility="None" HasUnevenRows="True">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
