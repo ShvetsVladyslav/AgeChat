@@ -5,11 +5,15 @@
     <ContentPage.Content>
         <StackLayout x:Name="mainLayout">
             <Image x:Name="logo"></Image>
-            <Label Text="Sign in" FontSize="40" HorizontalOptions="Center" Margin="0, 30, 0, 30"></Label>
+            <Label x:Name="pageTitleLabel" Text="Sign in" FontSize="40" HorizontalOptions="Center" Margin="0, 30, 0, 30"></Label>
             <Entry Placeholder="Login:" x:Name="login" Margin="0, 20, 0, 10" MaxLength="30" WidthRequest ="300" HorizontalOptions="Center"></Entry>
-            <Entry Placeholder="Password:" x:Name="password" Margin="0, 10, 0, 20" IsPassword ="True" MaxLength="30" WidthRequest ="300" HorizontalOptions="Center"></Entry>
-            <Button Text="Log in" WidthRequest="300" HorizontalOptions="Center" Margin="10" BackgroundColor="LightGreen" CornerRadius="5" Clicked="ButtonLogIn_ClickedAsync"></Button>
-            <Button Text="Create new account" WidthRequest="300" HorizontalOptions="Center" Margin="10" BackgroundColor="LightGreen" CornerRadius="5" Clicked="ButtonCreateNew_ClickedAsync"></Button>
+            <Entry Placeholder="Password:" x:Name="password" Margin="0, 10, 0, 10" IsPassword ="True" MaxLength="30" WidthRequest ="300" HorizontalOptions="Center"></Entry>
+            <Entry Placeholder="Repeat Password:" x:Name="repeatPassword" Margin="0, 10, 0, 10" IsPassword ="True" MaxLength="30" WidthRequest ="300" HorizontalOptions="Center" IsVisible="false"></Entry>
+            <Entry Placeholder="Username:" x:Name="usernameTextBox" Margin="0, 10, 0, 10" MaxLength="30" WidthRequest ="300" HorizontalOptions="Center" IsVisible="false"></Entry>
+            <Button x:Name="createAccountButton" Text="Create Account" WidthRequest="300" HorizontalOptions="Center" Margin="10, 20, 10, 10" BackgroundColor="LightGreen" CornerRadius="5" Clicked="CreateAccountButton_Clicked" IsVisible="false"></Button>
+            <Button x:Name="haveAccountButton" Text="I already have Account" WidthRequest="300" HorizontalOptions="Center" Margin="10" BackgroundColor="LightGreen" CornerRadius="5" Clicked="ButtonHaveAccount_Clicked" IsVisible="false"></Button>
+            <Button x:Name="loginButton" Text="Log in" WidthRequest="300" HorizontalOptions="Center" Margin="10, 20, 10, 10" BackgroundColor="LightGreen" CornerRadius="5" Clicked="ButtonLogIn_ClickedAsync"></Button>
+            <Button x:Name="createNewAccountButton" Text="Create new account" WidthRequest="300" HorizontalOptions="Center" Margin="10" BackgroundColor="LightGreen" CornerRadius="5" Clicked="ButtonCreateNew_Clicked"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

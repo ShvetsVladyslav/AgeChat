@@ -122,9 +122,92 @@ namespace AgeChatClient
             }
         }
 
-        private async void ButtonCreateNew_ClickedAsync(object sender, EventArgs e)
+        private void ButtonCreateNew_Clicked(object sender, EventArgs e)
         {
-            
+            SwitchLoginPage();
+        }
+
+        private void ButtonHaveAccount_Clicked(object sender, EventArgs e)
+        {
+            SwitchLoginPage();
+        }
+
+        private async void CreateAccountButton_Clicked(object sender, EventArgs e)
+        {
+            if (ws.State == WebSocketState.Open && !isLoggedIn)
+            {
+                if (login.Text != null && password.Text != null && repeatPassword.Text != null && usernameTextBox.Text != null)
+                {
+                    if (login.Text.Length != 0 && password.Text.Length != 0 && repeatPassword.Text.Length != 0 && usernameTextBox.Text.Length != 0)
+                    {
+                        if (password.Text == repeatPassword.Text)
+                        {
+                            messages.Clear();
+                            ws.Send("registration");
+                            Thread.Sleep(5);
+                            ws.Send(login.Text);
+                            Thread.Sleep(5);
+                            ws.Send(password.Text);
+                            Thread.Sleep(5);
+                            ws.Send(usernameTextBox.Text);
+
+                            int count = 0;
+                            await Task.Run(() =>
+                            {
+                                while (messages.Count == 0)
+                                {
+                                    if (count == 500)
+                                    {
+                                        DisplayAlert("Error", "Server failed to respond!", "Ok");
+                                    }
+                                    Thread.Sleep(10);
+                                    count++;
+                                }
+                            });
+
+                            if (messages[0] == $"User {usernameTextBox.Text} registered!")
+                            {
+                                await DisplayAlert("Success", "Congratulations! Your account was created!\nYou can sign in using it now!", "Let's go!");
+                                SwitchLoginPage();
+                            }
+                            else
+                            {
+                                await DisplayAlert("Error", messages[0], "Ok");
+                            }
+                        }
+                        else
+                        {
+                            await DisplayAlert("Error", "password fields do not match!", "Ok");
+                        }
+                    }
+                    else
+                    {
+                        await DisplayAlert("", "Input correct data!", "Ok");
+                    }
+                }
+                else
+                {
+                    await DisplayAlert("", "Input something!", "Ok");
+                }
+            }
+        }
+
+        private void SwitchLoginPage()
+        {
+            if (loginButton.IsVisible)
+            {
+                pageTitleLabel.Text = "Registration";
+            }
+            else
+            {
+                pageTitleLabel.Text = "Sign in";
+            }
+            repeatPassword.IsVisible = !repeatPassword.IsVisible;
+            usernameTextBox.IsVisible = !usernameTextBox.IsVisible;
+            createAccountButton.IsVisible = !createAccountButton.IsVisible;
+            haveAccountButton.IsVisible = !haveAccountButton.IsVisible;
+            loginButton.IsVisible = !loginButton.IsVisible;
+            createNewAccountButton.IsVisible = !createNewAccountButton.IsVisible;
         }
     }
 }
