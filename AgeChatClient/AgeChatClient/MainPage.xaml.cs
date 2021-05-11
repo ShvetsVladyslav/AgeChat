@@ -49,11 +49,6 @@ namespace AgeChatClient
         {
             return true;
         }
-        private void ButtonExit_Clicked(object sender, EventArgs e)
-        {
-            ws.Close();
-            Environment.Exit(0);
-        }
         private void ButtonLogout_Clicked(object sender, EventArgs e)
         {
             App.Current.Properties["username"] = "";
@@ -72,26 +67,7 @@ namespace AgeChatClient
         private void ChatLabel_Tapped(object sender, ItemTappedEventArgs e)
         {
             User user = (User)e.Item;
-            bool isOnline = false;
-            /*if (user.color == Color.LightGray)
-            {
-                isOnline = false;
-            }
-            else if (user.color == Color.LightGreen)
-            {
-                isOnline = true;
-            }*/
             Navigation.PushAsync(new ChatPage(ws, user.username));
         }
     }
 }
-
-/*if (messages.Count != 0)
-{
-    lbl1.Text = messages[0].ToString();
-    messages.RemoveAt(0);
-}
-else
-{
-    lbl1.Text = "";
-}*/

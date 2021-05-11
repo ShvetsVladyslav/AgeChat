@@ -16,24 +16,17 @@ namespace AgeChatClient
         WebSocket ws;
         List<string> messages;
         bool isLoggedIn = false;
-        public LoginPage()
-        {
-            InitializeComponent();
-            messages = new List<string>();
-
-            ws = new WebSocket("ws://192.168.0.109:8080/");
-            ws.EnableAutoSendPing = false;
-            ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(ReceivedMessage);
-
-            ws.Open();
-        }
-
         public LoginPage(WebSocket ws)
         {
             InitializeComponent();
             messages = new List<string>();
 
             this.ws = ws;
+            if (ws.State != WebSocketState.Open)
+            {
+                ws.EnableAutoSendPing = false;
+                ws.Open();
+            }
             ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(ReceivedMessage);
         }
 

@@ -9,7 +9,7 @@
                     <DataTemplate>
                         <ViewCell>
                             <StackLayout HorizontalOptions="FillAndExpand">
-                                <Label Text="{Binding message}" TextColor="Navy" FontSize="25" HorizontalOptions="StartAndExpand" VerticalOptions="CenterAndExpand" Padding="12"/>
+                                <Label Text="{Binding message}" TextColor="{Binding textColor}" FontSize="25" HorizontalOptions="StartAndExpand" VerticalOptions="CenterAndExpand" Padding="12"/>
                             </StackLayout>
                         </ViewCell>
                     </DataTemplate>

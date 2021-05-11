@@ -107,7 +107,13 @@ namespace AgeChatClient
         public Msg(string msg)
         {
             message = msg;
+            textColor = Color.Navy;
+            if (message.StartsWith(App.Current.Properties["username"].ToString()))
+            {
+                textColor = Color.Green;
+            }
         }
         public string message { get; set; }
+        public Color textColor { get; set; }
     }
 }
