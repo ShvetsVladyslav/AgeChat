@@ -26,6 +26,11 @@ namespace AgeChatClient
             messages = new ObservableCollection<Msg>();
             this.BindingContext = this;
             messageList.Margin = 10;
+
+            messageText.Completed += (sender, e) =>
+            {
+                ButtonSend_Clicked(sender, e);
+            };
         }
 
         protected override void OnAppearing()

@@ -28,6 +28,30 @@ namespace AgeChatClient
                 ws.Open();
             }
             ws.MessageReceived += new EventHandler<MessageReceivedEventArgs>(ReceivedMessage);
+
+            login.Completed += (sender, e) =>
+            {
+                password.Focus();
+            };
+            password.Completed += (sender, e) =>
+            {
+                if (repeatPassword.IsVisible)
+                {
+                    repeatPassword.Focus();
+                }
+                else
+                {
+                    ButtonLogIn_ClickedAsync(sender, e);
+                }
+            };
+            repeatPassword.Completed += (sender, e) =>
+            {
+                usernameTextBox.Focus();
+            };
+            usernameTextBox.Completed += (sender, e) =>
+            {
+                CreateAccountButton_Clicked(sender, e);
+            };
         }
 
         protected override void OnAppearing()
