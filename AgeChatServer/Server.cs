@@ -242,7 +242,21 @@ namespace AgeChatServer
                 catch (Exception e)
                 {
                     Console.WriteLine("Error: " + e);
-                    SendMessage($"Error: registration failed!", client.GetClientSocket());
+                    if (e.ToString().Contains("Duplicate entry"))
+                    {
+                        if (e.ToString().Contains("for key 'login'"))
+                        {
+                            SendMessage("User with this login is already exist!", client.GetClientSocket());
+                        }
+                        else if (e.ToString().Contains("for key 'username'"))
+                        {
+                            SendMessage("User with this username is already exist!", client.GetClientSocket());
+                        }
+                    }
+                    else
+                    {
+                        SendMessage("Error: registration failed!", client.GetClientSocket());
+                    }
                 }
                 db.CloseConnection();
             }
