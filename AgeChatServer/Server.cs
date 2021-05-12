@@ -386,6 +386,7 @@ namespace AgeChatServer
                         db.OpenConnection();
 
                         myDataReader = command.ExecuteReader();
+                        List<DBMessage> messageList = new List<DBMessage>();
                         while (myDataReader.Read())
                         {
                             string senderUsername = "";
@@ -397,7 +398,24 @@ namespace AgeChatServer
                                 }
                             }
                             string line = $"{senderUsername}: {myDataReader.GetString(3)}";
-                            SendMessage(line, sender.GetClientSocket());
+                            messageList.Add(new DBMessage(line, myDataReader.GetDateTime(4)));
+                        }
+                        DBMessage tmp;
+                        for (int j = 0; j < messageList.Count; j++)
+                        {
+                            for (int k = 1; k < messageList.Count; k++)
+                            {
+                                if (messageList[k].time < messageList[k - 1].time)
+                                {
+                                    tmp = messageList[k - 1];
+                                    messageList[k - 1] = messageList[k];
+                                    messageList[k] = tmp;
+                                }
+                            }
+                        }
+                        for (int j = 0; j < messageList.Count; j++)
+                        {
+                            SendMessage(messageList[j].message, sender.GetClientSocket());
                         }
 
                         db.CloseConnection();
@@ -569,4 +587,16 @@ namespace AgeChatServer
             Thread.CurrentThread.Abort();
         }
     }
+    
+    public class DBMessage
+    {
+        public DBMessage(string message, DateTime time)
+        {
+            this.message = message;
+            this.time = time;
+        }
+        public string message { get; set; }
+        public DateTime time { get; set; }
+    }
+
 }
