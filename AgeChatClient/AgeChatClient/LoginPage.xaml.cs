@@ -56,9 +56,6 @@ namespace AgeChatClient
 
         protected override void OnAppearing()
         {
-            logo.Source = ImageSource.FromResource("AgeChatClient.Images.Logo.png");
-            logo.Aspect = Aspect.AspectFill;
-
             if (ws.State != WebSocketState.Open)
             {
                 DisplayAlert("Error", "Connection error!", "Ok").ContinueWith(t =>
